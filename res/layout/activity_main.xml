@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg480"
+    android:orientation="vertical" >
+
+    <ListView
+        android:id="@+id/in"
+        android:layout_width="wrap_content"
+        android:layout_height="198dp"
+        android:stackFromBottom="true"
+        android:transcriptMode="alwaysScroll" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/edit_text_out"
+            android:layout_width="0dip"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_weight="1"
+            android:inputType="textEmailAddress|textNoSuggestions" />
+
+        <Button
+            android:id="@+id/button_send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/send" />
+    </LinearLayout>
+
+    <GridLayout
+        android:layout_width="221dp"
+        android:layout_height="144dp"
+        android:layout_gravity="center_horizontal"
+        android:columnCount="1" >
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_column="0"
+            android:layout_gravity="center_horizontal|top"
+            android:layout_row="0"
+            android:text="@string/up_button" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_column="0"
+            android:layout_gravity="left|center_vertical"
+            android:layout_row="0"
+            android:text="@string/left_button" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_column="0"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_row="0"
+            android:text="@string/down_button" />
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_column="0"
+            android:layout_gravity="right|center_vertical"
+            android:layout_row="0"
+            android:text="@string/right_button" />
+
+    </GridLayout>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="1" >
+
+        <LinearLayout
+            android:layout_column="0"
+            android:layout_gravity="left|top"
+            android:layout_row="0" >
+        </LinearLayout>
+
+        <Spinner
+            android:id="@+id/spinner1"
+            android:layout_width="223dp"
+            android:layout_height="wrap_content"
+            android:layout_column="0"
+            android:layout_gravity="left|top"
+            android:layout_row="0"
+            android:background="@android:drawable/btn_dropdown"
+            android:spinnerMode="dropdown" />
+
+        <Button
+            android:id="@+id/button6"
+            android:layout_column="0"
+            android:layout_gravity="right|center_vertical"
+            android:layout_row="0"
+            android:text="@string/submit" />
+
+    </GridLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </LinearLayout>
+
+</LinearLayout>
