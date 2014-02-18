@@ -73,12 +73,6 @@
         android:layout_height="wrap_content"
         android:columnCount="1" >
 
-        <LinearLayout
-            android:layout_column="0"
-            android:layout_gravity="left|top"
-            android:layout_row="0" >
-        </LinearLayout>
-
         <Spinner
             android:id="@+id/spinner1"
             android:layout_width="223dp"
@@ -98,9 +92,5 @@
 
     </GridLayout>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
-    </LinearLayout>
 
 </LinearLayout>

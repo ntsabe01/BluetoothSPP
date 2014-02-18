@@ -15,7 +15,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-//import android.view.Window;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.ArrayAdapter;
@@ -25,6 +24,7 @@ import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
 
 /**
  * This is the main Activity that displays the current chat session.
@@ -52,14 +52,20 @@ public class MainActivity extends Activity {
     private Button b1, b2, b3, b4, b6;
     private Spinner mSpinner;
     
+    public static int PlayerCount;
+    
     // Spinner Options
-    private static final String[] sPlayerNumber = {"Player 1", "Player 2", "Player 3", "Player 4", "Player 5", "Player 6", "Player 7"};
+    private static final String[] sPlayerNumber = {"Server", "Player 1", "Player 2", "Player 3", "Player 4", "Player 5", "Player 6", "Player 7"};
 
-    private String mConnectedDeviceName = null;
+    private String mConnectedDeviceName;
     private ArrayAdapter<String> mConversationArrayAdapter;
     private StringBuffer mOutStringBuffer;
     private BluetoothAdapter mBluetoothAdapter = null;
     private BluetoothService mChatService = null;
+    
+    public enum MessageType {
+        BET, CHECK, FOLD, QUIT 
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -130,18 +136,21 @@ public class MainActivity extends Activity {
                 sendMessage(message);
             }
         });
-        
+        //Bet 100
         b1 = (Button) findViewById(R.id.button2);
-        b1.setOnClickListener(new OnClickListener() {public void onClick(View v) {sendMessage("Up");}});
+        b1.setOnClickListener(new OnClickListener() {public void onClick(View v) {sendMessage(Integer.toString(mChatService.getPlayerNumber()) + "0100");}});
         
+        //Check
         b2 = (Button) findViewById(R.id.button3);
-        b2.setOnClickListener(new OnClickListener() {public void onClick(View v) {sendMessage("Left");}});
+        b2.setOnClickListener(new OnClickListener() {public void onClick(View v) {sendMessage(Integer.toString(mChatService.getPlayerNumber()) + "1");}});
         
+        //Fold
         b3 = (Button) findViewById(R.id.button4);
-        b3.setOnClickListener(new OnClickListener() {public void onClick(View v) {sendMessage("Down");}}); 
+        b3.setOnClickListener(new OnClickListener() {public void onClick(View v) {sendMessage(Integer.toString(mChatService.getPlayerNumber()) + "2");}}); 
         
+        //Quit
         b4 = (Button) findViewById(R.id.button5);
-        b4.setOnClickListener(new OnClickListener() {public void onClick(View v) {sendMessage("Right");}});         
+        b4.setOnClickListener(new OnClickListener() {public void onClick(View v) {sendMessage(Integer.toString(mChatService.getPlayerNumber()) + "3");}});         
         
         mChatService = new BluetoothService(this, mHandler);
 
@@ -248,8 +257,27 @@ public class MainActivity extends Activity {
                 byte[] readBuf = (byte[]) msg.obj;
                 // construct a string from the valid bytes in the buffer
                 String readMessage = new String(readBuf, 0, msg.arg1);
-                mConversationArrayAdapter.add(mConnectedDeviceName+":  " + readMessage);
+//XXXNTS:parse message here
+                mConversationArrayAdapter.add(MessageParse(readMessage));
                 break;
+//            case MESSAGE_DEVICE_NAME:
+//                // save the connected device's name
+//            	if(mConnectedDeviceName != null)
+//            	{
+//	            	for(int i = 0; i < mConnectedDeviceName.size(); i++)
+//	            	{
+//	            		if(mConnectedDeviceName.contains(msg.getData().getString(DEVICE_NAME)))
+//	            			break;
+//	            		else
+//	            			mConnectedDeviceName.add(msg.getData().getString(DEVICE_NAME));
+//	            	}
+//            	}
+//            	else
+//            		mConnectedDeviceName.add(msg.getData().getString(DEVICE_NAME));
+//            	
+//                Toast.makeText(getApplicationContext(), "Connected to "
+//                               + mConnectedDeviceName.get(0), Toast.LENGTH_SHORT).show();
+//                break;
             case MESSAGE_DEVICE_NAME:
                 // save the connected device's name
                 mConnectedDeviceName = msg.getData().getString(DEVICE_NAME);
@@ -295,8 +323,7 @@ public class MainActivity extends Activity {
 
     private void connectDevice(Intent data, boolean secure) {
         // Get the device MAC address
-        String address = data.getExtras()
-            .getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
+        String address = data.getExtras().getString(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
         // Get the BluetoothDevice object
         BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         // Attempt to connect to the device
@@ -330,5 +357,48 @@ public class MainActivity extends Activity {
             return true;
         }
         return false;
+    }
+    
+    public String MessageParse(String message)
+    {	
+    	//Remove the first character to determine who sent the message
+    	String playerNumber = message.substring(0, 1);
+    	
+    	//Remove the second character to determine what message type was sent
+    	MessageType mType = MessageType.values()[Integer.valueOf(message.substring(1, 2))];
+    	
+    	String parsedString = null;
+    	
+    	switch(mType)
+    	{
+    		//player wants to bet
+	    	case BET:
+	    		if(message.length() > 2)
+	    		{
+	    			String betAmount = message.substring(2);
+	    			parsedString = "Player " + playerNumber + "BETS " + betAmount;
+	    		}
+	    		else
+	    			parsedString = "Player " + playerNumber + "BETS 0";
+	    		break;
+	    	//player wants to fold
+	    	case FOLD:
+	    		parsedString = "Player " + playerNumber + "FOLDS";
+	    		break;
+	    	//player wants to check
+	    	case CHECK:
+	    		parsedString = "Player " + playerNumber + "CHECKS";
+	    		break;
+	    	//player wants to leave the game
+	    	case QUIT:
+	    		parsedString = "Player " + playerNumber + "QUITS";
+	    		break;
+	    	//the player somehow sent an unknown message
+	    	default:
+	    		parsedString = message;
+	    		break;
+    	}
+    	
+    	return parsedString;
     }
 }

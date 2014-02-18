@@ -39,6 +39,7 @@ public class BluetoothService {
     private ConnectedThread mConnectedThread;
     private int mState;
     private int mPlayerNumber;
+    private ArrayList<Integer> mConnectedUUID;
     
     //xxxNTS: for multiple connections
     private ArrayList<String> mDeviceAddresses;
@@ -94,6 +95,16 @@ public class BluetoothService {
         return mState;
     }
 
+    public synchronized void setConnectedUUID(int value)
+    {
+    	mConnectedUUID.add(value);
+    }
+    
+    public synchronized int getConnectedUUID(int index)
+    {
+        return mConnectedUUID.get(index);
+    }
+    
     public synchronized void setPlayerNumber(int number)
     {
     	mPlayerNumber = number;
@@ -140,8 +151,8 @@ public class BluetoothService {
         if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
 
         // Create a new thread and attempt to connect to the UUID based on Player Number 
-    	try { 
-            mConnectThread = new ConnectThread(device, mUuids.get(getPlayerNumber()));
+    	try {
+            mConnectThread = new ConnectThread(device, mUuids.get(getPlayerNumber()-1));
             mConnectThread.start();
             setState(STATE_CONNECTING);
     	} catch (Exception e) {
@@ -153,20 +164,15 @@ public class BluetoothService {
      * @param socket  The BluetoothSocket on which the connection was made
      * @param device  The BluetoothDevice that has been connected
      */
-    public synchronized void connected(BluetoothSocket socket, BluetoothDevice device) {
-        if (D) Log.d(TAG, "connected");
-
-        //Commented out all the cancellations of existing threads, since we want multiple connections.
-        /*
-        // Cancel the thread that completed the connection
-        if (mConnectThread != null) {mConnectThread.cancel(); mConnectThread = null;}
-
-        // Cancel any thread currently running a connection
-        if (mConnectedThread != null) {mConnectedThread.cancel(); mConnectedThread = null;}
-
-        // Cancel the accept thread because we only want to connect to one device
-        if (mAcceptThread != null) {mAcceptThread.cancel(); mAcceptThread = null;}
-         */
+    public synchronized void connected(BluetoothSocket socket, BluetoothDevice device, int index){
+    	if(index != -1)
+    	{
+	        if (D) Log.d(TAG, "connected to "+ device.getName() + " UUID: #" + Integer.toString(index));
+	        
+	        this.setConnectedUUID(index);
+    	}
+    	else
+    		if (D) Log.d(TAG, "connected to "+ device.getName());
 
         // Start the thread to manage the connection and perform transmissions
         mConnectedThread = new ConnectedThread(socket);
@@ -266,7 +272,7 @@ public class BluetoothService {
                     	String address = socket.getRemoteDevice().getAddress();
 	                    mSockets.add(socket);
 	                    mDeviceAddresses.add(address);
-	                    connected(socket, socket.getRemoteDevice());
+	                    connected(socket, socket.getRemoteDevice(), i);
                     }	                    
             	}
             } catch (IOException e) {
@@ -337,7 +343,7 @@ public class BluetoothService {
             }
 
             // Start the connected thread
-            connected(mmSocket, mmDevice);
+            connected(mmSocket, mmDevice, -1);
         }
 
         public void cancel() {
