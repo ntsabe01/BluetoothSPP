@@ -32,5 +32,6 @@
     <string name="down_button">Fold</string>
     <string name="left_button">Check</string>
     <string name="submit">Submit</string>
+    <string name="serversend">serversend</string>
 
 </resources>

@@ -102,6 +102,11 @@ public class DeviceListActivity extends Activity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+    }
+    
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 

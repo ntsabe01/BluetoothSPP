@@ -24,22 +24,18 @@ import android.util.Log;
  */
 public class BluetoothService {
     // Debugging
-    private static final String TAG           = "BluetoothChatService";
-    private static final boolean D            = true;
-
+    private static final String TAG  = "BluetoothChatService";
+    private static final boolean D   = true;
     private static final String NAME = "BluetoothChat";
     
     public static BluetoothDevice remoteDevice;
-
     private final BluetoothAdapter mAdapter;
     private final Handler mHandler;
     private AcceptThread mSecureAcceptThread;
-    private AcceptThread mInsecureAcceptThread;
     private ConnectThread mConnectThread;
     private ConnectedThread mConnectedThread;
     private int mState;
     private int mPlayerNumber;
-    private ArrayList<Integer> mConnectedUUID;
     
     //xxxNTS: for multiple connections
     private ArrayList<String> mDeviceAddresses;
@@ -93,16 +89,6 @@ public class BluetoothService {
      * Return the current connection state. */
     public synchronized int getState() {
         return mState;
-    }
-
-    public synchronized void setConnectedUUID(int value)
-    {
-    	mConnectedUUID.add(value);
-    }
-    
-    public synchronized int getConnectedUUID(int index)
-    {
-        return mConnectedUUID.get(index);
     }
     
     public synchronized void setPlayerNumber(int number)
@@ -166,11 +152,8 @@ public class BluetoothService {
      */
     public synchronized void connected(BluetoothSocket socket, BluetoothDevice device, int index){
     	if(index != -1)
-    	{
 	        if (D) Log.d(TAG, "connected to "+ device.getName() + " UUID: #" + Integer.toString(index));
-	        
-	        this.setConnectedUUID(index);
-    	}
+
     	else
     		if (D) Log.d(TAG, "connected to "+ device.getName());
 
@@ -197,7 +180,6 @@ public class BluetoothService {
         if (mConnectThread        != null) {mConnectThread.cancel();mConnectThread = null;}
         if (mConnectedThread      != null) {mConnectedThread.cancel();mConnectedThread = null;}
         if (mSecureAcceptThread   != null) {mSecureAcceptThread.cancel();mSecureAcceptThread = null;}
-        if (mInsecureAcceptThread != null) {mInsecureAcceptThread.cancel();mInsecureAcceptThread = null;}
         setState(STATE_NONE);
     }
 
@@ -223,6 +205,22 @@ public class BluetoothService {
     		}
     	}
     }
+    
+    public void writeToPlayerNumber(byte[] out, int playerNumber) {
+    	// When writing, try to write out to all connected threads 
+		try {
+            // Create temporary object
+            ConnectedThread r;
+            // Synchronize a copy of the ConnectedThread
+            synchronized (this) {
+                if (mState != STATE_CONNECTED) return;
+                r = mConnThreads.get(playerNumber);
+            }
+            // Perform the write unsynchronized
+            r.write(out);
+		} catch (Exception e) {    			
+		}
+	}
 
     /**
      * Indicate that the connection attempt failed and notify the UI Activity.
